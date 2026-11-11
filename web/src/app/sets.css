@@ -1,0 +1,134 @@
+.warn-note {
+  color: var(--warn);
+}
+/* Distinct from .warn-note on purpose: a concentration warning says "this
+   number is true but narrow", an adjustment note says "this number was
+   changed". Same colour would merge two different claims. */
+.fix-note {
+  color: var(--accent);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+th {
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  padding: 0.4rem 0.6rem;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  font-weight: 600;
+}
+th.num {
+  text-align: right;
+}
+
+td {
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+th.num,
+td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+tbody tr:hover td {
+  background: var(--surface);
+}
+
+.c-set {
+  min-width: 14rem;
+}
+.name {
+  display: block;
+  font-weight: 500;
+}
+.meta {
+  display: block;
+  font-size: 0.76rem;
+  color: var(--muted);
+  margin-top: 0.15rem;
+}
+
+.sub-note {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--muted);
+  font-weight: 400;
+  cursor: help;
+}
+
+.pct {
+  font-weight: 600;
+}
+.pct.up {
+  color: var(--up);
+}
+.pct.down {
+  color: var(--down);
+}
+.none {
+  color: var(--muted);
+}
+/* A new set with nothing settled to compare yet: a note, not a number. */
+.settling {
+  color: var(--warn);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.c-top {
+  min-width: 17rem;
+}
+.top-line {
+  display: block;
+  font-size: 0.82rem;
+}
+.top-line a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.top-line a:hover {
+  text-decoration: underline;
+}
+.top-variant {
+  color: var(--muted);
+  font-size: 0.76rem;
+  margin-left: 0.3rem;
+}
+.top-detail {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  margin-top: 0.1rem;
+}
+
+/* Marks a row whose numbers were altered by despiking. Accent, not warn:
+   it is a correction, not a caveat. */
+.fixed {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--accent);
+  font-weight: 400;
+  cursor: help;
+  white-space: nowrap;
+}
+
+/* A flagged row is one where a single card outweighs the rest of the set
+   combined. Marked on the row, not just in a footnote, because the number a
+   reader takes away is the percentage in the row they're looking at. */
+.flag {
+  color: var(--warn);
+  margin-right: 0.2rem;
+}
+tr.flagged .top-detail {
+  color: var(--warn);
+}

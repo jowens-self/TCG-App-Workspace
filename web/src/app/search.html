@@ -1,0 +1,147 @@
+<header class="head">
+  <h1>CardTracker</h1>
+  <p class="sub">Card / product search across your tracked games</p>
+</header>
+
+<form class="controls" (submit)="$event.preventDefault()">
+  <input
+    class="q"
+    type="search"
+    name="q"
+    placeholder="Search by card or product name, e.g. Charizard"
+    autocomplete="off"
+    spellcheck="false"
+    [value]="query"
+    (input)="onQueryChange($any($event.target).value)"
+    aria-label="Search by name"
+  />
+
+  <select
+    class="game"
+    [(ngModel)]="game"
+    name="game"
+    (ngModelChange)="onFilterChange()"
+    aria-label="Filter by game"
+  >
+    <option [ngValue]="null">All games</option>
+    @for (g of games(); track g.categoryId) {
+      <option [ngValue]="g.categoryId">{{ g.name }}</option>
+    }
+  </select>
+
+  <label class="toggle">
+    <input
+      type="checkbox"
+      name="hideSealed"
+      [(ngModel)]="hideSealed"
+      (ngModelChange)="onFilterChange()"
+    />
+    Singles only
+  </label>
+</form>
+
+@if (error()) {
+  <p class="error">{{ error() }}</p>
+}
+
+<div class="panes">
+  <section class="results" [class.has-selection]="selected()" aria-label="Search results">
+    @if (searching()) {
+      <p class="hint">Searching…</p>
+    } @else if (searched() && results().length === 0) {
+      <p class="hint">No matches.</p>
+    } @else if (!searched()) {
+      <p class="hint">Type a name to begin.</p>
+    }
+
+    @for (item of results(); track item.productId) {
+      <button
+        type="button"
+        class="row"
+        [class.active]="selected()?.productId === item.productId"
+        (click)="select(item)"
+      >
+        <!-- No marker on the thumbnail itself: it is 34px wide and hidden
+             from screen readers, so a borrowed picture is said in words, in
+             the tags below. -->
+        <card-thumb class="thumb" [productId]="item.productId" />
+
+        <span class="meta">
+          <span class="name">{{ item.name }}</span>
+          <span class="tags">
+            <!-- number + rarity are identity here, not decoration: one set
+                 reprints the same card at several rarities across a huge
+                 price range. -->
+            @if (item.cardNumber) {
+              <span class="tag num-tag">{{ item.cardNumber }}</span>
+            }
+            @if (item.rarity) {
+              <span class="tag rarity">{{ item.rarity }}</span>
+            }
+            <!-- Only when it isn't already in the name beside it: the label
+                 is extracted FROM that name, so 78.7% of the time this chip
+                 was repeating words already on screen, and doing it louder
+                 than the name itself. -->
+            @if (variantLabelAddsInfo(item.name, item.variantLabel)) {
+              <span class="tag variant">{{ item.variantLabel }}</span>
+            }
+            @if (item.isSealed) {
+              <span class="tag sealed">Sealed</span>
+            }
+            @if (item.variantCount > 1) {
+              <span class="tag variant-count">{{ item.variantCount }} variants</span>
+            }
+            <!-- Only when card_image_provenance() proves the picture is
+                 another printing's, never because a card merely has a label:
+                 that was an earlier mistake. About a fifth of
+                 pictures qualify. -->
+            @if (item.artBorrowed) {
+              <span
+                class="tag art-warn"
+                [title]="borrowedArtNote(item.variantLabel, item.artOwnerName)"
+                >Base printing's art</span
+              >
+            }
+          </span>
+          <span class="set">{{ item.setName }} · {{ item.game }}</span>
+        </span>
+      </button>
+    }
+
+    <!-- Only rendered while more may exist, so a finished list says nothing.
+         The count rides along with the button rather than standing alone:
+         "12 shown" under twelve visible rows is noise, but "50 shown" beside
+         a way to get more answers "am I seeing everything?", which
+         until now the screen quietly got wrong. -->
+    @if (moreAvailable()) {
+      <div class="more-row">
+        <span class="more-count">{{ results().length }} shown</span>
+        <button
+          type="button"
+          class="more"
+          [disabled]="loadingMore()"
+          (click)="loadMore()"
+        >
+          {{ loadingMore() ? 'Loading…' : 'Load more' }}
+        </button>
+      </div>
+    }
+  </section>
+
+  <aside class="detail" [class.empty]="!selected()" aria-label="Item detail">
+    @if (selected(); as item) {
+      <!-- The same card view Movers opens under a row, so a card reads the
+           same everywhere. Its close button only shows below 960px, where
+           this panel pins over the results; on the two-column layout it is
+           just a column and there is nothing to dismiss. -->
+      <card-detail
+        [card]="item"
+        [games]="games()"
+        closeButton="narrow"
+        (closed)="clearSelection()"
+      />
+    } @else {
+      <p class="hint">Select an item to see its variants and price history.</p>
+    }
+  </aside>
+</div>

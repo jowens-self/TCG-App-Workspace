@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="CardTracker" type="CompoundRunConfigurationType">
+    <toRun name="API" type="Application" />
+    <toRun name="Web" type="js.build_tools.npm" />
+    <method v="2" />
+  </configuration>
+</component>

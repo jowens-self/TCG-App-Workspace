@@ -1,0 +1,109 @@
+.minprice input {
+  width: 5rem;
+  margin-left: 0.3rem;
+}
+.minprice {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.method {
+  margin-bottom: 0.75rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+th {
+  text-align: left;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+td {
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+th.num,
+td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+tr.row {
+  cursor: pointer;
+}
+tr.row:hover td {
+  background: var(--surface);
+}
+tr.row.active td {
+  background: var(--accent-fade);
+}
+
+.c-item {
+  min-width: 16rem;
+}
+/* Flex so the text block stays put whether or not a picture arrived. */
+.c-item {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+.item-text {
+  min-width: 0;
+}
+/* Fixed box, so a card with no image does not reflow the row. */
+.name {
+  display: block;
+  font-weight: 500;
+}
+.set {
+  display: block;
+  font-size: 0.76rem;
+  color: var(--muted);
+  margin-top: 0.15rem;
+}
+.c-variant {
+  color: var(--muted);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.tags {
+  margin-top: 0.2rem;
+}
+.pct {
+  font-weight: 600;
+}
+.pct.up {
+  color: var(--up);
+}
+.pct.down {
+  color: var(--down);
+}
+
+/* --- the open card, spanning the table right under its row --- */
+tr.preview-row > td {
+  padding: 0 0 0.9rem;
+  cursor: default;
+}
+.preview {
+  margin-top: 0.35rem;
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 1rem 1.1rem 1.1rem;
+  background: var(--surface);
+  /* A little room above it when it's scrolled into view. */
+  scroll-margin: 1rem;
+}

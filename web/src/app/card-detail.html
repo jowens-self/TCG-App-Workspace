@@ -1,0 +1,160 @@
+@let c = card();
+
+<div class="head">
+  <div class="title">
+    <h2>{{ c.name }}</h2>
+    <p class="sub">
+      {{ c.setName }} · {{ c.game }}
+      @if (c.cardNumber) {
+        · {{ c.cardNumber }}
+      }
+      @if (c.rarity) {
+        · {{ c.rarity }}
+      }
+      @if (c.isSealed) {
+        · Sealed
+      }
+    </p>
+  </div>
+  <button
+    type="button"
+    class="close"
+    [class.narrow-only]="closeButton() === 'narrow'"
+    (click)="closed.emit()"
+    aria-label="Close"
+  >
+    ✕
+  </button>
+</div>
+
+<div class="body">
+  <div class="art-col">
+    <!-- Served off our own disk by /api/items/{id}/image, never a third
+         party. Hidden once it 404s, which is ordinary (about 40% of Pokemon
+         singles, and all One Piece) rather than an error. -->
+    @if (!imageMissing()) {
+      <figure class="art">
+        <img
+          [class.loaded]="imageLoaded()"
+          [src]="imageUrl()"
+          [alt]="c.name"
+          (load)="imageLoaded.set(true)"
+          (error)="imageMissing.set(true)"
+        />
+        <!-- The one real caution about a picture: provably another printing's
+             art. The owner printing's name is in the tooltip;
+             at this width it would truncate, and the caution is the message. -->
+        @if (provenance()?.provenance === 'base_art') {
+          <span class="art-warn-band" [title]="provenanceTooltip()">Base printing's art</span>
+        }
+        @if (variantLabelAddsInfo(c.name, c.variantLabel ?? null)) {
+          <figcaption class="variant-band" [title]="c.variantLabel!">
+            {{ c.variantLabel }}
+          </figcaption>
+        }
+      </figure>
+    }
+    @if (c.url) {
+      <!-- An href fetches nothing until clicked; outbound links are a
+           feature (CLAUDE.md), images from TCGplayer are not. -->
+      <a class="tcg-link" [href]="c.url" target="_blank" rel="noopener">View on TCGplayer ↗</a>
+    }
+  </div>
+
+  <div class="info-col">
+    @if (move(); as m) {
+      <!-- What put this card on the board, restated where the chart can
+           explain it. Medians at each end, same as the row it came from. -->
+      <div class="move">
+        <span class="move-label">
+          {{ m.subTypeName }} over the last {{ m.days }}{{ m.days === 1 ? ' day' : ' days' }}
+        </span>
+        <span class="move-prices">
+          {{ m.thenPrice | currency }} → {{ m.nowPrice | currency }}
+          <span class="move-pct" [class.up]="m.pctChange >= 0" [class.down]="m.pctChange < 0">
+            {{ m.pctChange >= 0 ? '+' : '' }}{{ m.pctChange | number: '1.2-2' }}%
+          </span>
+        </span>
+      </div>
+    }
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+    @if (loading()) {
+      <p class="hint">Loading variants…</p>
+    }
+
+    @if (variants().length) {
+      <div class="variants" role="tablist" aria-label="Variants">
+        @for (v of variants(); track v.subTypeName) {
+          <button
+            type="button"
+            role="tab"
+            class="variant"
+            [class.active]="activeVariant() === v.subTypeName"
+            [attr.aria-selected]="activeVariant() === v.subTypeName"
+            (click)="showVariant(v.subTypeName)"
+          >
+            <span class="v-name">{{ v.subTypeName }}</span>
+            <span class="v-price">
+              {{ v.latestMarket != null ? (v.latestMarket | currency) : '—' }}
+            </span>
+            <span class="v-ath">
+              ATH {{ v.allTimeHigh != null ? (v.allTimeHigh | currency) : '—' }}
+            </span>
+          </button>
+        }
+      </div>
+    }
+
+    @if (activeVariant()) {
+      <div class="history">
+        @if (history().length) {
+          @let ret = totalReturn();
+          <div class="ret-row">
+            <span class="ret-label">Since {{ shownFrom() }}</span>
+            @if (ret !== null) {
+              <span class="ret" [class.up]="ret >= 0" [class.down]="ret < 0">
+                {{ ret >= 0 ? '+' : '' }}{{ ret | number: '1.2-2' }}%
+              </span>
+            }
+          </div>
+          <price-chart [series]="chartSeries()" />
+          @if (chartOnlyLaunch()) {
+            <p class="hint">
+              This card hasn't settled yet, so everything here is launch pricing. It's
+              shown anyway rather than an empty chart.
+            </p>
+          }
+          <!-- Same setting as Movers and Sets. Only offered for a card that has
+               launch pricing, so most charts don't carry dead controls. -->
+          @if (hasLaunch()) {
+            <div class="launch-toggles">
+              <label [title]="preReleaseTitle">
+                <input
+                  type="checkbox"
+                  [ngModel]="launch.includePreRelease()"
+                  (ngModelChange)="launch.includePreRelease.set($event)"
+                  name="includePreRelease"
+                />
+                Include pre-release
+              </label>
+              <label [title]="earlyTitle()">
+                <input
+                  type="checkbox"
+                  [ngModel]="launch.includeEarly()"
+                  (ngModelChange)="launch.includeEarly.set($event)"
+                  name="includeEarly"
+                />
+                Include early pricing
+              </label>
+            </div>
+          }
+        } @else {
+          <p class="hint">Loading history…</p>
+        }
+      </div>
+    }
+  </div>
+</div>

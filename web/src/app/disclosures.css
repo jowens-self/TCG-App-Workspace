@@ -1,0 +1,59 @@
+:host {
+  max-width: 760px;
+}
+
+.toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin: 0 0 1.75rem;
+  font-size: 0.88rem;
+}
+.toc a,
+section a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.toc a:hover,
+section a:hover {
+  text-decoration: underline;
+}
+
+section {
+  margin-bottom: 2rem;
+  /* Clears the page top when a contents link scrolls here. */
+  scroll-margin-top: 1rem;
+}
+h2 {
+  margin: 0 0 0.6rem;
+  font-size: 1.15rem;
+}
+h3 {
+  margin: 1.1rem 0 0.35rem;
+  font-size: 0.95rem;
+}
+p,
+li {
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+p {
+  margin: 0 0 0.6rem;
+}
+ul {
+  margin: 0 0 0.6rem;
+  padding-left: 1.2rem;
+}
+li + li {
+  margin-top: 0.4rem;
+}
+.lead {
+  color: var(--muted);
+}
+/* How the reader's own box is set, so the rule reads as theirs. */
+.yours {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}

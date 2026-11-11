@@ -1,0 +1,34 @@
+@if (staleNote(); as note) {
+  <p class="stale-banner" role="status">
+    <strong>Data is stale.</strong> {{ note }}
+    The numbers below are the last ones received, not current prices. Check
+    that the daily pull is running.
+  </p>
+}
+
+<nav class="tabs" aria-label="Screens">
+  @for (t of tabs; track t.id) {
+    <button
+      type="button"
+      class="tab"
+      [class.active]="tab() === t.id"
+      [class.aside-tab]="t.id === 'disclosures'"
+      [attr.aria-current]="tab() === t.id ? 'page' : null"
+      (click)="tab.set(t.id)"
+    >
+      {{ t.label }}
+    </button>
+  }
+</nav>
+
+@if (tab() === 'search') {
+  <app-search />
+} @else if (tab() === 'movers') {
+  <app-movers />
+} @else if (tab() === 'sets') {
+  <app-sets />
+} @else if (tab() === 'disclosures') {
+  <app-disclosures />
+} @else {
+  <app-settings />
+}

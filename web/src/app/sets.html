@@ -1,0 +1,235 @@
+<header class="head">
+  <h1>Sets</h1>
+  <p class="sub">
+    What each set is worth, and how it moved over the last
+    {{ days }}{{ days === 1 ? ' day' : ' days' }}
+  </p>
+</header>
+
+<form class="controls" (submit)="$event.preventDefault()">
+  <select [(ngModel)]="game" name="game" (ngModelChange)="load()" aria-label="Game">
+    <option [ngValue]="null">All games</option>
+    @for (g of games(); track g.categoryId) {
+      <option [ngValue]="g.categoryId">{{ g.name }}</option>
+    }
+  </select>
+
+  <select [(ngModel)]="days" name="days" (ngModelChange)="load()" aria-label="Window">
+    <option [ngValue]="1">1 day</option>
+    <option [ngValue]="7">7 days</option>
+    <option [ngValue]="14">14 days</option>
+    <option [ngValue]="30">30 days</option>
+    <option [ngValue]="90">90 days</option>
+    <option [ngValue]="180">180 days</option>
+    <option [ngValue]="365">1 year</option>
+  </select>
+
+  <label class="toggle">
+    <input
+      type="checkbox"
+      [ngModel]="hideEmpty()"
+      (ngModelChange)="hideEmpty.set($event)"
+      name="hideEmpty"
+    />
+    Hide sets with no return
+  </label>
+
+  <label class="toggle" [title]="modernNote()">
+    <input
+      type="checkbox"
+      [ngModel]="modernOnly()"
+      (ngModelChange)="modernOnly.set($event)"
+      name="modernOnly"
+    />
+    Modern only
+  </label>
+
+  <!-- Launch pricing starts unticked: both parts are mostly noise. Shared
+       with the other screens. -->
+  <label class="toggle" [title]="preReleaseTitle">
+    <input
+      type="checkbox"
+      [ngModel]="launch.includePreRelease()"
+      (ngModelChange)="launch.includePreRelease.set($event); load()"
+      name="includePreRelease"
+    />
+    Include pre-release
+  </label>
+
+  <label class="toggle" [title]="earlyTitle()">
+    <input
+      type="checkbox"
+      [ngModel]="launch.includeEarly()"
+      (ngModelChange)="launch.includeEarly.set($event); load()"
+      name="includeEarly"
+    />
+    Include early pricing
+  </label>
+
+  <!-- Exposed rather than hidden because it changes reported numbers. A
+       correction you can't switch off is a correction you can't check. -->
+  <label class="toggle">
+    <input
+      type="checkbox"
+      [ngModel]="despike()"
+      (ngModelChange)="despike.set($event); load()"
+      name="despike"
+    />
+    Correct one-day price errors
+  </label>
+</form>
+
+@if (error()) {
+  <p class="error">{{ error() }}</p>
+}
+
+@if (loading()) {
+  <p class="hint">Loading…</p>
+} @else if (visible().length === 0) {
+  <p class="hint">No sets to show. Try a different game or a longer window.</p>
+} @else {
+  <!-- Both caveats stated up front rather than left for a reader to
+       discover: what the aggregate covers, and that a set-level percentage
+       is frequently one card's move wearing a set's name. -->
+  <p class="method">
+    Singles only — sealed product never counts toward a set total. Value is
+    one of every card priced on
+    {{ window()?.to }}; change compares only the cards priced on both
+    {{ window()?.from }} and {{ window()?.to }}, so a set gaining or losing
+    cards mid-window can't look like a price move.
+  </p>
+
+  @if (modernOnly()) {
+    <p class="method">{{ modernNote() }}</p>
+  }
+
+  @if (launchNote(); as note) {
+    <p class="method">
+      {{ note }}
+      @if (hiddenNewCount() > 0) {
+        {{ hiddenNewCount() }}
+        {{ hiddenNewCount() === 1 ? 'new set is' : 'new sets are' }} hidden until
+        {{ hiddenNewCount() === 1 ? 'it has' : 'they have' }} something settled to
+        compare. Untick "Hide sets with no return" to see
+        {{ hiddenNewCount() === 1 ? 'it' : 'them' }}.
+      }
+    </p>
+  }
+
+  @if (despike() && despikedCount() > 0) {
+    <p class="method fix-note">
+      ⤾ {{ despikedCount() }} of {{ visible().length }} sets shown had a price
+      that swung hard and was back to its previous level the next day. Those
+      readings were replaced with the median of the surrounding days —
+      stored prices are untouched, and unticking the box above shows the raw
+      comparison.
+    </p>
+  }
+
+  @if (flaggedCount() > 0) {
+    <p class="method warn-note">
+      ⚠ {{ flaggedCount() }} of {{ visible().length }} sets shown have over half
+      their movement coming from a single card. Those percentages describe
+      that one card far more than they describe the set — the “driven by”
+      column names it.
+    </p>
+  }
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="c-set">Set</th>
+          <th class="num">Cards</th>
+          <th class="num">Value</th>
+          <th class="num">Change</th>
+          <th class="c-top">Driven by</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of visible(); track r.groupId) {
+          <tr [class.flagged]="concentrated(r)">
+            <td class="c-set">
+              <span class="name">{{ r.setName }}</span>
+              <span class="meta">
+                {{ r.game }}
+                @if (r.publishedOn) {
+                  · {{ r.publishedOn }}
+                }
+              </span>
+            </td>
+
+            <td class="num">
+              {{ r.nPriced | number }}
+              <!-- Shown only when it matters: these cards are in the value
+                   but not in the change basket, which is the one way the
+                   two numbers legitimately disagree. -->
+              @if (notInBasket(r) > 0) {
+                <span
+                  class="sub-note"
+                  [title]="
+                    notInBasket(r) +
+                    ' count toward value but not toward change: they were not priced on ' +
+                    r.startDate +
+                    ', or their price then was still pre-release or early pricing'
+                  "
+                >
+                  +{{ notInBasket(r) }} new
+                </span>
+              }
+            </td>
+
+            <td class="num">{{ r.totalValue | currency }}</td>
+
+            <td class="num">
+              @if (r.pctReturn === null && r.settlesOn) {
+                <span class="settling" [title]="settlingTitle(r)">{{ settlingLabel(r) }}</span>
+              } @else if (r.pctReturn === null) {
+                <span class="none" title="No cards priced on both dates">—</span>
+              } @else {
+                <span
+                  class="pct"
+                  [class.up]="r.pctReturn >= 0"
+                  [class.down]="r.pctReturn < 0"
+                >
+                  {{ r.pctReturn >= 0 ? '+' : '' }}{{ r.pctReturn | number: '1.2-2' }}%
+                </span>
+              }
+              @if (r.nDespiked > 0) {
+                <span class="fixed" [title]="despikeTitle(r)">
+                  ⤾ adjusted
+                </span>
+              }
+            </td>
+
+            <td class="c-top">
+              @if (r.topName) {
+                <span class="top-line">
+                  @if (concentrated(r)) {
+                    <span class="flag" aria-hidden="true">⚠</span>
+                  }
+                  @if (r.topUrl) {
+                    <!-- An href fetches nothing until clicked; outbound
+                         product links are a core feature (see CLAUDE.md). -->
+                    <a [href]="r.topUrl" target="_blank" rel="noopener">{{ r.topName }}</a>
+                  } @else {
+                    {{ r.topName }}
+                  }
+                  <span class="top-variant">{{ r.topSubType }}</span>
+                </span>
+                <span class="top-detail">
+                  {{ (r.topDelta ?? 0) >= 0 ? '+' : '' }}{{ r.topDelta | currency }}
+                  @if (r.topShare !== null) {
+                    · {{ r.topShare | number: '1.0-1' }}% of all movement
+                  }
+                </span>
+              } @else {
+                <span class="none">—</span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

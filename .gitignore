@@ -1,0 +1,18 @@
+target/
+dependency-reduced-pom.xml
+.idea/
+*.iml
+.DS_Store
+
+# Angular front end (web/)
+node_modules/
+web/dist/
+web/.angular/
+npm-debug.log*
+
+# Cached card thumbnails (fetched from pokemontcg.io, regenerable).
+# LEADING SLASH IS LOAD-BEARING: a bare `images/` matches a directory of
+# that name at ANY depth, which silently excluded the Java package
+# src/main/java/com/cardtracker/images/ - the importer source went
+# uncommitted for a full day before anyone noticed.
+/images/

@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:16
+    container_name: tcg-workspace-db
+    environment:
+      POSTGRES_DB: cardtracker
+      POSTGRES_USER: cardtracker
+      POSTGRES_PASSWORD: workspace-dev
+    # Bound to localhost only, and on 5433 so it can sit beside another
+    # Postgres on the default port without either noticing the other.
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./sql/functions.sql:/docker-entrypoint-initdb.d/02-functions.sql:ro
+
+volumes:
+  pgdata:

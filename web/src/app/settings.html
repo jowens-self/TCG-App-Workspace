@@ -1,0 +1,137 @@
+<header class="head">
+  <h1>Settings</h1>
+  <p class="sub">Your preferences, and the rules the trend screens count by</p>
+</header>
+
+@if (error()) {
+  <p class="error">{{ error() }}</p>
+}
+
+<section class="card" aria-labelledby="prefs-title">
+  <div class="card-head">
+    <h2 id="prefs-title">Your preferences</h2>
+    <span class="saved-note">Saved as you change them</span>
+  </div>
+
+  @if (prefs.saveFailed()) {
+    <p class="error">Your last change didn't save. Is the API running?</p>
+  }
+
+  <h3>Trend screens</h3>
+  <p class="section-help">
+    Movers, Sets and card charts. The same two boxes are on those screens too; this
+    is one setting, wherever you change it.
+  </p>
+  <label class="option">
+    <input
+      type="checkbox"
+      [ngModel]="prefs.includePreRelease()"
+      (ngModelChange)="prefs.includePreRelease.set($event)"
+      name="includePreRelease"
+    />
+    <span class="option-text">
+      <span class="option-name">Include pre-release prices</span>
+      <span class="option-help">{{ preReleaseTitle }}</span>
+    </span>
+  </label>
+  <label class="option">
+    <input
+      type="checkbox"
+      [ngModel]="prefs.includeEarly()"
+      (ngModelChange)="prefs.includeEarly.set($event)"
+      name="includeEarly"
+    />
+    <span class="option-text">
+      <span class="option-name">Include early pricing</span>
+      <span class="option-help">
+        A card's first weeks after release, while its price settles. How many weeks
+        is set per game below.
+      </span>
+    </span>
+  </label>
+</section>
+
+<section class="card" aria-labelledby="rules-title">
+  <div class="card-head">
+    <h2 id="rules-title">Game rules</h2>
+    <span class="saved-note">What every trend screen counts</span>
+  </div>
+
+  @for (p of panels(); track p.game.categoryId) {
+    <div class="game">
+      <h3>{{ p.game.name }}</h3>
+
+      <label class="field">
+        <span class="field-name">Modern starts with</span>
+        <!-- Picked by set, saved as that set's release date. The server then
+             counts every set on or after it; nothing here decides which sets
+             qualify. -->
+        <select
+          [ngModel]="p.draft.modernSince"
+          (ngModelChange)="setCutoff(p, $event)"
+          [name]="'modern-' + p.game.categoryId"
+          [disabled]="!p.years.length"
+        >
+          <option [ngValue]="null">No cutoff: every set is modern</option>
+          @if (unlistedCutoff(p); as custom) {
+            <option [ngValue]="custom">{{ custom }} (set by hand)</option>
+          }
+          @for (y of p.years; track y.year) {
+            <optgroup [label]="y.year">
+              @for (c of y.choices; track c.date) {
+                <option [ngValue]="c.date">{{ c.label }}</option>
+              }
+            </optgroup>
+          }
+        </select>
+      </label>
+      <p class="field-help">
+        Right now {{ p.game.modernSetCount }} of {{ p.game.setCount }} sets count as
+        modern.
+        @if (p.game.modernSince) {
+          Sets with no release date never do, since they can't be placed in an era.
+        }
+      </p>
+
+      <label class="field">
+        <span class="field-name" [title]="earlyTitle(p)">Early pricing lasts</span>
+        <span class="weeks">
+          <input
+            type="number"
+            min="0"
+            max="52"
+            step="1"
+            [ngModel]="p.draft.earlyWeeks"
+            (ngModelChange)="setEarlyWeeks(p, $event)"
+            [name]="'early-' + p.game.categoryId"
+          />
+          weeks after release
+        </span>
+      </label>
+      @if (!validWeeks(p)) {
+        <p class="error">A whole number of weeks, from 0 to 52.</p>
+      }
+
+      <div class="actions">
+        <button
+          type="button"
+          class="save"
+          [disabled]="!changed(p) || !validWeeks(p) || p.saving"
+          (click)="save(p)"
+        >
+          {{ p.saving ? 'Saving…' : 'Save ' + p.game.name + ' rules' }}
+        </button>
+        @if (p.saved && !changed(p)) {
+          <span class="ok">Saved</span>
+        }
+        @if (p.error) {
+          <span class="fail">{{ p.error }}</span>
+        }
+      </div>
+    </div>
+  } @empty {
+    @if (!error()) {
+      <p class="hint">Loading…</p>
+    }
+  }
+</section>

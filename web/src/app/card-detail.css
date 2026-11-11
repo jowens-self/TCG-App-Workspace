@@ -1,0 +1,270 @@
+/* Laid out by its own width, not the screen's: stacked in Search's side
+   column (~520px), picture beside the numbers in a Movers row (~1000px). */
+:host {
+  display: block;
+  container-type: inline-size;
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.head h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+.sub {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+}
+.close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--muted);
+  border-radius: 6px;
+  width: 1.75rem;
+  height: 1.75rem;
+  cursor: pointer;
+  font: inherit;
+  line-height: 1;
+}
+.close:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+/* Search's side column covers nothing on a wide screen, so there is
+   nothing to dismiss; it only pins over the results below 960px. Must
+   match search.css's breakpoint. */
+.close.narrow-only {
+  display: none;
+}
+@media (max-width: 960px) {
+  .close.narrow-only {
+    display: inline-flex;
+  }
+}
+
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.9rem;
+  margin-top: 0.9rem;
+}
+@container (min-width: 640px) {
+  .body {
+    grid-template-columns: 160px minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+.art-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* --- artwork --- */
+.art {
+  position: relative;
+  width: 160px;
+  height: 220px;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  overflow: hidden;
+}
+/* 160px wide is the cached image's native width (ImportCardImages
+   THUMB_WIDTH), so it renders 1:1 with no upscaling. Hidden until it loads,
+   so a 404 never paints a broken-image glyph. */
+.art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.art img.loaded {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .art img {
+    transition: none;
+  }
+}
+/* Sits over the card's own text box, the least costly part of the art to
+   cover. Fixed colours, not tokens: it floats on the artwork, not on a
+   themed surface, so it must stay legible in both themes. */
+.variant-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0.28rem 0.35rem;
+  background: rgba(0, 0, 0, 0.58);
+  backdrop-filter: blur(1.5px);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Top edge, opposite .variant-band, so a card can carry both. Filled,
+   because unlike the quiet variant chip in lists this is a genuine caution,
+   meant to be read before the picture is trusted. */
+.art-warn-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  padding: 0.28rem 0.35rem;
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(1.5px);
+  color: var(--warn);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tcg-link {
+  font-size: 0.82rem;
+  color: var(--accent);
+  text-decoration: none;
+}
+.tcg-link:hover {
+  text-decoration: underline;
+}
+
+/* --- the move that put it on the Movers board --- */
+.move {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  margin-bottom: 0.9rem;
+}
+.move-label {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.move-prices {
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+}
+.move-pct {
+  font-weight: 600;
+  margin-left: 0.4rem;
+}
+.move-pct.up,
+.ret.up {
+  color: var(--up);
+}
+.move-pct.down,
+.ret.down {
+  color: var(--down);
+}
+
+.error {
+  padding: 0.5rem 0.7rem;
+  font-size: 0.85rem;
+  margin: 0 0 0.75rem;
+}
+.hint {
+  font-size: 0.85rem;
+  padding: 0;
+  margin: 0.4rem 0;
+}
+
+/* --- variants --- */
+.variants {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin: 0 0 1rem;
+}
+.variant {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+.variant:hover {
+  border-color: var(--accent);
+}
+.variant.active {
+  border-color: var(--accent);
+  background: var(--accent-fade);
+}
+.v-name {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.v-price {
+  font-size: 1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.v-ath {
+  font-size: 0.68rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- chart --- */
+.ret-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+}
+.ret-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.ret {
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.launch-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  margin-top: 0.6rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.launch-toggles label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  user-select: none;
+}

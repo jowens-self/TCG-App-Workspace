@@ -1,0 +1,155 @@
+:host {
+  max-width: 760px;
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1rem 1.1rem 1.1rem;
+  margin-bottom: 1.5rem;
+  background: var(--surface);
+}
+.card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.4rem;
+}
+.card-head h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+.saved-note {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+h3 {
+  margin: 1.1rem 0 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.section-help {
+  margin: 0 0 0.5rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+/* --- preferences --- */
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+  cursor: pointer;
+}
+.option input {
+  margin-top: 0.2rem;
+  flex: none;
+}
+.option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.option-name {
+  font-size: 0.95rem;
+}
+.option-help {
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* --- game rules --- */
+.game + .game {
+  border-top: 1px solid var(--line);
+  margin-top: 1rem;
+}
+.game h3 {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 1rem;
+  color: inherit;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin: 0.6rem 0 0.2rem;
+}
+.field-name {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.field select,
+.field input {
+  padding: 0.5rem 0.6rem;
+  font-size: 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: inherit;
+  max-width: 100%;
+}
+.field select:focus,
+.field input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.weeks {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+.weeks input {
+  width: 5rem;
+}
+.field-help {
+  margin: 0.2rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 0.9rem;
+}
+.save {
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.85rem;
+}
+.save:disabled {
+  background: none;
+  border-color: var(--line);
+  color: var(--muted);
+  cursor: default;
+}
+.ok {
+  font-size: 0.82rem;
+  color: var(--up);
+}
+.fail {
+  font-size: 0.82rem;
+  color: var(--danger);
+}
+
+.error {
+  padding: 0.5rem 0.7rem;
+  font-size: 0.85rem;
+  margin: 0.4rem 0;
+}

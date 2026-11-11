@@ -1,0 +1,10 @@
+@if (!failed()) {
+  <img
+    [src]="imageUrl()"
+    alt=""
+    loading="lazy"
+    [class.loaded]="loaded()"
+    (load)="loaded.set(true)"
+    (error)="failed.set(true)"
+  />
+}

@@ -1,0 +1,214 @@
+/* --- controls --- */
+.controls {
+  margin-bottom: 1.25rem;
+}
+.q {
+  flex: 1 1 22rem;
+  padding: 0.6rem 0.8rem;
+  font-size: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: inherit;
+}
+.q:focus,
+.game:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+.game {
+  padding: 0.6rem 0.7rem;
+  font-size: 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: inherit;
+}
+/* --- layout --- */
+.panes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+/* Two columns only while both actually have room. Measured: at 1280 each
+   column is 518px and reads fine; by 820 they're ~378px, set names wrap to
+   two lines and the chart is squeezed into ~350px. Below this the list
+   takes the full width and the chart pins to the bottom instead (see the
+   narrow-screen block at the end of this file). Keep this number in sync
+   with that media query; they are two halves of one decision. */
+@media (max-width: 960px) {
+  .panes {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- results --- */
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+.row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+.row:hover {
+  background: var(--surface);
+}
+.row.active {
+  background: var(--accent-fade);
+  border-color: var(--accent);
+}
+.thumb {
+  width: 40px;
+  height: 56px;
+  border-radius: 4px;
+  border: 1px dashed var(--line);
+}
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+.name {
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+.set {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.tag.num-tag {
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+/* Deliberately the quiet default: same weight as the base .tag, no fill and
+   no --warn. It reads as identity, sitting with card number and rarity,
+   because that is what it is. It was a filled --warn pill until 2026-08-19,
+   which made it the loudest thing in the row while usually just repeating
+   the card's own name, and implied doubt about artwork that is correct.
+   --warn is reserved for a real caution: a picture that is genuinely
+   another printing's art. That reservation is spent, but NOT here: it went
+   to .art-warn-band on the detail artwork (card-detail.css) and the
+   .tag.art-warn chip on these rows, both only where card_image_provenance()
+   proves the picture is borrowed. This chip still says nothing about
+   artwork. */
+.tag.variant {
+  border-color: var(--line);
+  color: var(--muted);
+  /* One-offs run long ("Galarian Articuno, Galarian Zapdos, & Galarian
+     Moltres"); the row must not stretch to fit one. */
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- detail: the column card-detail sits in (its own styles are there) --- */
+.detail {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1rem;
+  background: var(--surface);
+  position: sticky;
+  top: 1rem;
+}
+
+/* Sits under the last result row, only while more may exist. */
+.more-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0.2rem 0.2rem;
+}
+.more-count {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.more {
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+}
+.more:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+.more:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
+/* --- narrow screens only: pin the detail panel ---------------------------
+   Below 960px the two columns stack, which puts the chart underneath the
+   whole result list, so clicking a row scrolls nothing into view and
+   looks like nothing happened. Pinning it to the viewport bottom is the
+   fix for THAT case specifically.
+
+   Deliberately scoped to this breakpoint. The same treatment applied at
+   desktop width was worse than the sticky column it replaced: a panel
+   permanently covering a third of the screen is a poor way to browse a
+   list when there's room to put the two side by side. Here there isn't.
+
+   Must match the .panes stacking breakpoint above. If the two ever
+   disagree, one width ends up with stacked columns and no pinning, which
+   is exactly the broken state this pair exists to prevent. */
+@media (max-width: 960px) {
+  /* Nothing selected means nothing to pin, so don't leave an empty bar
+     stuck across the bottom of the screen. */
+  .detail.empty {
+    display: none;
+  }
+
+  .detail:not(.empty) {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* Must clear the sticky rule's `top: 1rem`. With position:fixed and
+       both top and bottom set, top wins and the panel pins to the TOP of
+       the screen instead of the bottom. */
+    top: auto;
+    z-index: 20;
+    border: none;
+    border-top: 1px solid var(--line);
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 -8px 24px rgb(0 0 0 / 0.28);
+    /* Leaves at least ~40% of the screen on the results, and anything
+       taller scrolls inside the panel instead of off it. */
+    max-height: 58vh;
+    overflow-y: auto;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* The list gives up its own scrollbox here and lets the page scroll, so
+     rows can be scrolled clear of the pinned panel rather than being
+     trapped under it. */
+  .results {
+    max-height: none;
+    overflow: visible;
+  }
+  .results.has-selection {
+    padding-bottom: 62vh;
+  }
+}
